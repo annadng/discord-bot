@@ -24,7 +24,7 @@ public class DiscordBot {
                     .setActivity(Activity.playing("activity"))
                     .addEventListeners(new DiscordEventListener(new DiscordBot()))
                     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                    .build();
+                    .build().awaitReady();
         } catch(Exception e) {
             e.printStackTrace();
         }
