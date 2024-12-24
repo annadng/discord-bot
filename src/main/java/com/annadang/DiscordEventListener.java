@@ -2,14 +2,18 @@ package com.annadang;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
 import org.jetbrains.annotations.NotNull;
+
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.SearchResult;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -31,7 +35,6 @@ public class DiscordEventListener extends ListenerAdapter {
                     .setApplicationName("Discord Bot").build();
 
         } catch(Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -52,19 +55,19 @@ public class DiscordEventListener extends ListenerAdapter {
 
     }
 
-    public void searchYouTube(String searchQuery) {
+    public String searchYouTube(String searchQuery) {
 
         // Create properties object to load YouTube API
         Properties properties = new Properties();
 
         try {
-            // retrieve YouTube data API key
+            // Retrieve YouTube data API key
             InputStream input = new FileInputStream("config.properties");
             properties.load(input);
             String youTubeKey = properties.getProperty("youTubeKey");
 
-            // perform search using YouTube data API
-            YouTube.Search.List searchResults = youTube.search()
+            // Perform search using YouTube data API
+           List<SearchResult> searchResults = youTube.search()
                     .list("id,snippet")
                     .setQ(searchQuery)
                     .setType("video")
@@ -73,11 +76,14 @@ public class DiscordEventListener extends ListenerAdapter {
                     .getItems();
 
             if(!searchResults.isEmpty()) {
-                return "https://www.youtube.com/watch?v=" + searchResults.getId().getVideoID();
+                SearchResult firstResult = searchResults.get(0);
+                String videoId = firstResult.getId().getVideoId();
+                return "https://www.youtube.com/watch?v=" + videoId;
+            } else {
+                return null;
             }
 
-        } catch(Exception e) {
-            e.printStackTrace();
+        } catch(IOException e) {
         }
     }
 
