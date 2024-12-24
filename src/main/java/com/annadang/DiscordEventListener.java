@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.SearchListResponse;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -16,17 +15,17 @@ import java.util.Properties;
 
 public class DiscordEventListener extends ListenerAdapter {
 
-    // holds an instance of the DiscordBot class
+    // Holds an instance of the DiscordBot class
     public DiscordBot bot;
-    // holds an instance of YouTube
+    // Holds an instance of YouTube
     private YouTube youTube = null;
 
-    // constructor to assign an instance of the DiscordBot class to bot, constructs a DiscordEventListener object
+    // Constructor to assign an instance of the DiscordBot class to bot, constructs a DiscordEventListener object
     public DiscordEventListener(DiscordBot bot) {
 
         this.bot = bot;
 
-        // creates an instance of YouTube
+        // Creates an instance of YouTube 
         try {
             this.youTube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), null)
                     .setApplicationName("Discord Bot").build();
@@ -36,13 +35,16 @@ public class DiscordEventListener extends ListenerAdapter {
         }
     }
 
+    // Overrrides onMessageReceived whenever a message is sent in the discord channel
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 
-        // run searchYouTube method when user starts a message with "!play"
-        if(!event.getAuthor().isBot()) {
+        // Checks if the author is not a bot
+        if(!event.getAuthor().isBot()) { // 
             String message = event.getMessage().getContentRaw();
+            // Run searchYouTube method when user starts a message with "!play"
             if(message.startsWith("!play")) {
+                // Extract the search query from the message
                 String searchQuery = message.substring("!play".length()).trim();
                 searchYouTube(searchQuery);
             }
@@ -52,6 +54,7 @@ public class DiscordEventListener extends ListenerAdapter {
 
     public void searchYouTube(String searchQuery) {
 
+        // Create properties object to load YouTube API
         Properties properties = new Properties();
 
         try {
@@ -68,6 +71,10 @@ public class DiscordEventListener extends ListenerAdapter {
                     .setKey(youTubeKey)
                     .execute()
                     .getItems();
+
+            if(!searchResults.isEmpty()) {
+                return "https://www.youtube.com/watch?v=" + searchResults.getId().getVideoID();
+            }
 
         } catch(Exception e) {
             e.printStackTrace();

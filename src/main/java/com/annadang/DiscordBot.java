@@ -13,18 +13,18 @@ public class DiscordBot {
 
     public static void main(String[] args){
 
-        Properties properties = new Properties();
+        Properties properties = new Properties();  // Create properties object
 
         try {
-            InputStream input = new FileInputStream("config.properties");
-            properties.load(input);
-            String apiKey = properties.getProperty("apiKey");
+            InputStream input = new FileInputStream("config.properties"); // Opens config.properties to read
+            properties.load(input); // Loads input contents into the properties object
+            String apiKey = properties.getProperty("apiKey"); // Retrieve's apiKey stored in the config file
 
-            JDA bot = JDABuilder.createDefault(apiKey)
+            JDA bot = JDABuilder.createDefault(apiKey) // Initialises bot with apiKey
                     .setActivity(Activity.playing("activity"))
-                    .addEventListeners(new DiscordEventListener(new DiscordBot()))
+                    .addEventListeners(new DiscordEventListener(new DiscordBot())) // Event listener that handles DiscordEventListener instances
                     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                    .build().awaitReady();
+                    .build().awaitReady(); // Builds the bot and waits until its fully connected before proceeding
         } catch(Exception e) {
             e.printStackTrace();
         }
