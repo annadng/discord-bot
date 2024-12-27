@@ -14,6 +14,7 @@ import com.google.api.services.youtube.model.SearchResult;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -35,10 +36,11 @@ public class DiscordEventListener extends ListenerAdapter {
                     .setApplicationName("Discord Bot").build();
 
         } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 
-    // Overrrides onMessageReceived whenever a message is sent in the discord channel
+    // Overrides onMessageReceived whenever a message is sent in the discord channel
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 
@@ -49,7 +51,12 @@ public class DiscordEventListener extends ListenerAdapter {
             if(message.startsWith("!play")) {
                 // Extract the search query from the message
                 String searchQuery = message.substring("!play".length()).trim();
-                searchYouTube(searchQuery);
+                String finalResult = searchYouTube(searchQuery);
+                if(finalResult != null) {
+                    event.getChannel().sendMessage(finalResult).queue();
+                } else {
+                    event.getChannel().sendMessage("No results found");
+                }
             }
         }
 
@@ -67,10 +74,10 @@ public class DiscordEventListener extends ListenerAdapter {
             String youTubeKey = properties.getProperty("youTubeKey");
 
             // Perform search using YouTube data API
-           List<SearchResult> searchResults = youTube.search()
-                    .list("id,snippet")
+            List<SearchResult> searchResults = youTube.search()
+                    .list(Arrays.asList("id", "snippet"))
                     .setQ(searchQuery)
-                    .setType("video")
+                    .setType(Arrays.asList("video"))
                     .setKey(youTubeKey)
                     .execute()
                     .getItems();
@@ -84,6 +91,7 @@ public class DiscordEventListener extends ListenerAdapter {
             }
 
         } catch(IOException e) {
+            return null;
         }
     }
 
